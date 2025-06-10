@@ -1,6 +1,25 @@
 # Aicoder
 
 
+## Create environment files
+### .env.devel or .env.staging
+```
+HUGGINGFACE_TOKEN=<Your HuggingFace Token>
+
+AICODER_LOGLEVEL=DEBUG
+AICODER_HTTP_PORT=30081
+
+AICODER_REDIS_SERVER=localhost
+AICODER_REDIS_PORT=6378
+AICODER_CERTS_PATH=./app/tls_keys/
+
+AICODER_5GCODE_BASE_PATH=/home/mkaragiannop/atom/
+AICODER_5GCODE_PATH=/home/mkaragiannop/atom/fiveg/tests/automation/
+AICODER_5GCODE_EXTENSIONS=.py,.md
+
+AICODER_FAISS_INDEX_FOLDER=./faiss/
+```
+
 ## Local Debugging/Testing
 ```
 sudo rm -rf .venv
