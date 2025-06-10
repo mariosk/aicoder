@@ -1,0 +1,54 @@
+services:
+    redis:
+        image: redis:7.2
+        container_name: redis
+        privileged: true  # Enable privileged mode
+        user: "1001:1001"  # Replace with the UID:GID of the user with permission to access the files
+        environment:
+            - AICODER_REDIS_PORT=${AICODER_REDIS_PORT}
+        ports:
+            - "${AICODER_REDIS_PORT}:6379"
+        volumes:
+            - ./app/redis_data:/data
+            - ./app/tls_keys:/tls  # Mount TLS certificates
+        command: [
+            "redis-server",
+            "--dir", "/data",
+            # "--tls-port", "${AICODER_REDIS_PORT}",
+            # "--port", "0",                      # Disable non-TLS connections
+            # "--tls-cert-file", "/tls/server.crt",
+            # "--tls-key-file", "/tls/server.key",
+            # "--tls-ca-cert-file", "/tls/ca.crt",
+            # "--tls-auth-clients", "no"          # Optional: set to "yes" if clients need certificates to authenticate
+        ]
+        networks:
+            - redis_network
+
+    aicoder:
+        image: aicoder:latest
+        depends_on:
+            - redis
+        container_name: aicoder
+        environment:
+            - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+            - AICODER_HTTP_PORT=${AICODER_HTTP_PORT}
+            - AICODER_LOGLEVEL=${AICODER_LOGLEVEL}
+            - AICODER_REDIS_SERVER=${AICODER_REDIS_SERVER}
+            - AICODER_REDIS_PORT=${AICODER_REDIS_PORT}
+            - AICODER_5GCODE_PATH=${AICODER_5GCODE_PATH}
+            - AICODER_5GCODE_EXTENSIONS=${AICODER_5GCODE_EXTENSIONS}
+            - AICODER_FAISS_INDEX_FOLDER=${AICODER_FAISS_INDEX_FOLDER}
+        ports:
+            - "${AICODER_HTTP_PORT}:${AICODER_HTTP_PORT}"
+        restart: always
+        # network_mode: "host"
+        privileged: true
+        volumes:
+            - ${AICODER_5GCODE_BASE_PATH}:${AICODER_5GCODE_BASE_PATH}
+            - ./faiss/:${AICODER_FAISS_INDEX_FOLDER}
+        networks:
+            - redis_network
+
+networks:
+  redis_network:
+    driver: bridge
